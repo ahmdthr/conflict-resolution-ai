@@ -53,7 +53,7 @@ git config --global user.email "you@example.com"
 Clone the repo:
 
 ```bash
-git clone https://gitlab.pixida.partners/DE497/conflict-resolution-ai.git
+git clone git@github.com:ahmdthr/conflict-resolution-ai.git
 cd conflict-resolution-ai
 ```
 
