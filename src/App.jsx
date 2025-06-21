@@ -224,29 +224,30 @@ function App() {
     } else if (selectedEngine === 'engine2') {
       const userMsg = {
         role: 'user',
-        content: `${currAgentObj.personName}: ${userInput}`,
+        content: `${userInput}`,
       };
       const updated = [...messages, userMsg];
       setMessages(updated);
-      const agentId = agentTurn === 'A' ? agentAId : agentBId;
-      const threadId = agentTurn === 'A' ? threadAId : threadBId;
-      const agentDefaultTraitString =
+      const nextAgentObj =
         agentTurn === 'A'
-          ? templates.agentADefaultTraits
-          : templates.agentBDefaultTraits;
+          ? formattedAgentTraits.agentB
+          : formattedAgentTraits.agentA;
+      const nextAgentId = agentTurn === 'A' ? agentAId : agentBId;
+      const nextThreadId = agentTurn === 'A' ? threadAId : threadBId;
+      const nextAgentDefaultTraitString =
+        agentTurn === 'A'
+          ? templates.agentBDefaultTraits
+          : templates.agentADefaultTraits;
       const agentTraitString =
-        Array.isArray(currAgentObj.traits) && currAgentObj.traits.length > 1
-          ? JSON.stringify(currAgentObj.traits)
-          : agentDefaultTraitString;
+        Array.isArray(nextAgentObj.traits) && nextAgentObj.traits.length > 1
+          ? JSON.stringify(nextAgentObj.traits)
+          : nextAgentDefaultTraitString;
       sendMessageToAssistant(
-        agentId,
-        threadId,
+        nextAgentId,
+        nextThreadId,
         formatString(templates.engine2AgentAInstructions, {
-          personAName: currAgentObj.personName,
-          personBName:
-            agentTurn === 'A'
-              ? formattedAgentTraits.agentB.personName
-              : formattedAgentTraits.agentA.personName,
+          personAName: nextAgentObj.personName,
+          personBName: currAgentObj.personName,
           agentTraits: agentTraitString,
           conversationSetting: conversationSetting,
           conversationScenario: conversationScenario,
@@ -255,7 +256,7 @@ function App() {
         `${userInput}`,
       ).then((reply) => {
         setMessages([
-          ...messages,
+          ...updated,
           { role: 'assistant', content: reply.response },
         ]);
         setIsLoading(false);
@@ -298,11 +299,10 @@ function App() {
   };
 
   const handleIncidentDialogText = (text) => {
-    text = text.trim();
     if (text.length != 0) {
       const fullText = `While the conversation is going on, another conflicting scenario has occurred.
-      Here is the new scenario: ${text}.`;
-      setIncidentDialogText(fullText);
+      Here is the new scenario: ${text}`;
+      setIncidentDialogText(fullText.trimStart());
     } else {
       setIncidentDialogText('');
     }
